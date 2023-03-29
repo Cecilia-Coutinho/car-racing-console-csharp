@@ -47,5 +47,3 @@ These features serve as a solid foundation for a functional console-based car ra
 <p>
 The MVP should be a functional console-based car racing simulation system with no graphics. This project provides a learning opportunity for implementing concepts such as threading and simulation programming.
 </p>
-
-# car-racing-console-csharp
