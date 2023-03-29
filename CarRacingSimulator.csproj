@@ -13,8 +13,4 @@
 	  <None Remove="Documents\**" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="Models\" />
-	</ItemGroup>
-
 </Project>
