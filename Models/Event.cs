@@ -14,6 +14,7 @@ namespace CarRacingSimulator.Models
         // default implementations for common methods to reduce duplication 
         public string EventName { get; protected set; }
         public int PenaltyTime { get; protected set; }
+        public double Probability { get; protected set; }
         protected EventBase(string eventName, int penaltyTime)
         {
             EventName = eventName;

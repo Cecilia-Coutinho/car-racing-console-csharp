@@ -2,7 +2,7 @@
 {
     public class Race
     {
-        public int DefaultDistance { get; set; } = 10; //km
+        public int DefaultDistance { get; set; } = 3; //km
         public int DefaultSpeed { get; set; } = 120; //km/h
         static int HourInSeconds { get; } = 3600; //1h
         public int StartSpeed { get; } = 0; //always starts with 0

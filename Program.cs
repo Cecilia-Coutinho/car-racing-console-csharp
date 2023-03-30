@@ -1,4 +1,5 @@
 ﻿using CarRacingSimulator.Models;
+using System;
 
 namespace CarRacingSimulator
 {
@@ -6,8 +7,6 @@ namespace CarRacingSimulator
     {
         static async Task Main(string[] args)
         {
-            //Race race = new Race();
-            //Console.WriteLine(Race.DistanceTakeInSec(race.DefaultSpeed, race.DefaultDistance));
             Car velocityTurttle = new Car("Velocity Turttle");
             Car speedRacer = new Car("Speed Racer");
 
@@ -27,6 +26,7 @@ namespace CarRacingSimulator
 
             // Print the end of the race
             Console.WriteLine("Done!");
+            //
 
         }
 
@@ -36,41 +36,64 @@ namespace CarRacingSimulator
             int timeRemaining = Race.DistanceTakeInSec(race.DefaultSpeed, race.DefaultDistance); //How long will take to finish the race
             int timeElapsed = race.StartSpeed; //How long it took to finish
 
+            // Loop until the race is finished
             while (timeRemaining > 0)
             {
-                await WaitForEvent(30);
+                // Wait for 30 seconds before the next move
+                await WaitForEvent(30, car);
                 timeRemaining -= 30;
                 timeElapsed += 30;
+
+                // Determine the probability of each event occurring
+                double outOfGasProbability = 45 / 50 * (100);
+                double flatTireProbability = 48 / 50 * (100);
+                double birdInWindshieldProbability = 50 / 50 * (100);
+                int rand = new Random().Next(0, 100);
 
                 //randon method to call event
                 var events = race.RandEvents;
                 var randomEventIndex = new Random().Next(0, events.Count);
                 var randomEvent = events[randomEventIndex];
-                await randomEvent.Apply(car);
-                timeRemaining += randomEvent.PenaltyTime;
-                timeElapsed += randomEvent.PenaltyTime;
+
+                if (
+                    rand <= outOfGasProbability &&
+                    randomEvent == events.Find(e => e is OutOfGasEvent)
+                    ||
+                    rand <= flatTireProbability &&
+                    randomEvent == events.Find(e => e is FlatTireEvent)
+                    ||
+                    rand <= birdInWindshieldProbability
+                    && randomEvent == events.Find(e => e is BirdInWindshieldEvent)
+                    )
+                {
+                    await randomEvent.Apply(car);
+                    // Add the random event penalty to both the elapsed and remaining time
+                    timeRemaining += randomEvent.PenaltyTime;
+                    timeElapsed += randomEvent.PenaltyTime;
+                }
+
+
             };
 
             // Set the finish time for the car
             race.SecondsToFinish = timeElapsed;
 
             Console.WriteLine($"{car.Name} took {timeElapsed} seconds to complete the race.");
-            await Task.Delay(TimeSpan.FromSeconds(3));
-            Console.WriteLine("Race completed");
+            //Console.WriteLine("Race completed");
         }
 
         private static async Task DefineWinner(Race race1, Race race2)
         {
             // Determine which car finished first
             var winner = race1.SecondsToFinish < race2.SecondsToFinish ? "Velocity Turttle" : "Speed Racer";
-            await Task.Delay(TimeSpan.FromSeconds(3));
+            await Task.Delay(TimeSpan.FromSeconds(2));
             Console.WriteLine($"{winner} won the race!");
         }
 
-        private static async Task WaitForEvent(int timeToWait)
+        private static async Task WaitForEvent(int timeToWait, Car car)
         {
             await Task.Delay(TimeSpan.FromSeconds(timeToWait));
-            Console.WriteLine("\nwait Completed\n");
+            Console.WriteLine($"\nwait Completed {car.Name}\n");
         }
 
         // Generate a random number
