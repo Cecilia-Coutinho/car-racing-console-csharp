@@ -1,22 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CarRacingSimulator.Models
+﻿namespace CarRacingSimulator.Models
 {
-    internal class Car
+    public class Car
     {
-        public string? CarName { get; set; }
-        public int StartSpeed { get; set; }
-        public int DefaultSpeed { get; set; }
+        public string? Name { get; set; }
 
-        public Car(string carName)
+        public Car(string name)
         {
-            CarName = carName;
-            StartSpeed = 0;
-            DefaultSpeed = 120; //km/h
+            Name = name;
         }
+
     }
 }
