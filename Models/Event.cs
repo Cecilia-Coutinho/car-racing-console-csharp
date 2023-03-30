@@ -23,7 +23,7 @@ namespace CarRacingSimulator.Models
 
         public virtual async Task Apply(Car car)
         {
-            Console.WriteLine($"Car {car?.Name?.ToUpper()} experienced {EventName} and needs to wait {PenaltyTime} seconds...");
+            Console.WriteLine($"{car?.Name?.ToUpper()} experienced {EventName} and needs to wait {PenaltyTime} seconds...");
             await Task.Delay(TimeSpan.FromSeconds(PenaltyTime));
         }
     }
@@ -62,12 +62,12 @@ namespace CarRacingSimulator.Models
     {
         static Race race = new Race();
         static int speedReduction = race.DefaultSpeed - 1;
-        static int penaltyTime = Race.DistanceTakeInSec(speedReduction, race.DefaultDistance);
-        public EngineProblemEvent() : base("Engine problem", penaltyTime) { }
+        static int additionalTime = Race.DistanceTakeInSec(speedReduction, race.TimeRemaining) - race.TimeRemaining;
+        public EngineProblemEvent() : base("Engine problem", additionalTime) { }
         public override async Task Apply(Car car)
         {
-            Console.WriteLine($"Car {car?.Name?.ToUpper()} experienced {EventName} and needs to be towed back to the starting point...");
-            await Task.Delay(TimeSpan.FromSeconds(penaltyTime));
+            Console.WriteLine($"{car?.Name?.ToUpper()} experienced {EventName} and reduced his speed's power...");
+            await Task.Delay(TimeSpan.FromSeconds(additionalTime));
         }
     }
 
@@ -77,10 +77,10 @@ namespace CarRacingSimulator.Models
 
     //public double Probability { get; set; }
 
-    //public Event(bool isPenalty, TimeSpan penaltyTime, double probability)
+    //public Event(bool isPenalty, TimeSpan newTimeRemaining, double probability)
     //{
     //    IsPenalty = isPenalty;
-    //    PenaltyTime = penaltyTime;
+    //    PenaltyTime = newTimeRemaining;
     //    Probability = probability;
     //}
     //OutOfGas() 30s
