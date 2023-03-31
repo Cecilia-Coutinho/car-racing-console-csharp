@@ -27,6 +27,7 @@ namespace CarRacingSimulator.Models
             await Task.Delay(TimeSpan.FromSeconds(PenaltyTime));
             if (EventName != "Engine Problem")
             {
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
                 Console.WriteLine($"\nLook who's back and ready to roll - it's {car?.Name?.ToUpper()}! Watch out, everyone else, this car is coming in hot!");
             }
             Console.ResetColor();
