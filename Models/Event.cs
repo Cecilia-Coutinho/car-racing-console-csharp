@@ -14,7 +14,6 @@ namespace CarRacingSimulator.Models
         // default implementations for common methods to reduce duplication 
         public string EventName { get; protected set; }
         public int PenaltyTime { get; protected set; }
-        public double Probability { get; protected set; }
         protected EventBase(string eventName, int penaltyTime)
         {
             EventName = eventName;
@@ -23,15 +22,21 @@ namespace CarRacingSimulator.Models
 
         public virtual async Task Apply(Car car)
         {
-            Console.WriteLine($"{car?.Name?.ToUpper()} experienced {EventName} and needs to wait {PenaltyTime} seconds...");
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine($"\n\t{car?.Name?.ToUpper()} experienced {EventName} and needs to wait {PenaltyTime} seconds...");
             await Task.Delay(TimeSpan.FromSeconds(PenaltyTime));
+            if (EventName != "Engine Problem")
+            {
+                Console.WriteLine($"\nLook who's back and ready to roll - it's {car?.Name?.ToUpper()}! Watch out, everyone else, this car is coming in hot!");
+            }
+            Console.ResetColor();
         }
     }
 
     public class OutOfGasEvent : EventBase
     {
         static int penaltyTime = 30;
-        public OutOfGasEvent() : base("Out of gas", penaltyTime) { }
+        public OutOfGasEvent() : base("Out Of Gas", penaltyTime) { }
         public override string ToString()
         {
             return $"{EventName} {penaltyTime}";
@@ -51,7 +56,7 @@ namespace CarRacingSimulator.Models
     public class BirdInWindshieldEvent : EventBase
     {
         static int penaltyTime = 10;
-        public BirdInWindshieldEvent() : base("Bird in the windshield", penaltyTime) { }
+        public BirdInWindshieldEvent() : base("Bird In The Windshield", penaltyTime) { }
         public override string ToString()
         {
             return $"{EventName} {penaltyTime}";
@@ -62,36 +67,14 @@ namespace CarRacingSimulator.Models
     {
         static Race race = new Race();
         static int speedReduction = race.DefaultSpeed - 1;
-        static int additionalTime = Race.DistanceTakeInSec(speedReduction, race.TimeRemaining) - race.TimeRemaining;
-        public EngineProblemEvent() : base("Engine problem", additionalTime) { }
+        static int newDistanceInSec = Race.DistanceTakeInSec(speedReduction, race.DefaultDistance);
+        static int penaltyTime = newDistanceInSec - race.TimeRemaining;
+        public EngineProblemEvent() : base("Engine Problem", penaltyTime) { }
         public override async Task Apply(Car car)
         {
-            Console.WriteLine($"{car?.Name?.ToUpper()} experienced {EventName} and reduced his speed's power...");
-            await Task.Delay(TimeSpan.FromSeconds(additionalTime));
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine($"\n\t{car?.Name?.ToUpper()} experienced {EventName} and reduced his speed's power...");
+            await Task.Delay(TimeSpan.FromSeconds(penaltyTime));
         }
     }
-
-    //public readonly Random Random = new Random();
-    //public bool IsPenalty { get; set; }
-    //public TimeSpan PenaltyTime { get; set; }
-
-    //public double Probability { get; set; }
-
-    //public Event(bool isPenalty, TimeSpan newTimeRemaining, double probability)
-    //{
-    //    IsPenalty = isPenalty;
-    //    PenaltyTime = newTimeRemaining;
-    //    Probability = probability;
-    //}
-    //OutOfGas() 30s
-    //FlatTire() 20s
-    //BirdInWindshield() 10s
-    //EngineProblem() -=1km
-
-    //public string OutOfGas(Car car)
-    //{
-    //    return $"Car {car?.Name?.ToUpper()} is out of gas and needs to refuel...";
-    //}
-
-
 }

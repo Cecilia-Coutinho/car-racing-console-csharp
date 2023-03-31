@@ -15,7 +15,7 @@ namespace CarRacingSimulator
             Race race2 = new Race();
             Race race3 = new Race();
 
-            Console.WriteLine($"Starting race...");
+            Console.WriteLine($"\nStarting race...\n");
 
             // Start both races concurrently using Task.WhenAll
             await Task.WhenAll(
@@ -25,38 +25,39 @@ namespace CarRacingSimulator
             );
 
             // Determine the winner and print the result
-            await DefineWinner(race1, race2, race3);
+            await DefineWinner(race1, race2, race3, velocityTurtle, speedRacer, slowBunny);
 
             // Print the end of the race
-            Console.WriteLine("Done!");
+            Console.WriteLine("\nRace Finished!");
+            //
         }
 
         public static async Task StartRace(Car car, Race race)
         {
-            //Race race = new Race();
-            int timeRemaining = Race.DistanceTakeInSec(race.DefaultSpeed, race.DefaultDistance); //How long will take to finish the race
+            race.TimeRemaining = Race.DistanceTakeInSec(race.DefaultSpeed, race.DefaultDistance); //How long will take to finish the race
             int timeElapsed = race.StartSpeed; //How long it took to finish
 
             // Loop until the race is finished
-            while (timeRemaining > 0)
+            while (race.TimeRemaining > 0)
             {
                 // Wait for 30 seconds before the next move
                 int timeToWait = 30;
                 await WaitForEvent(timeToWait, car);
-                timeRemaining -= timeToWait;
+                race.TimeRemaining -= timeToWait;
                 timeElapsed += timeToWait;
 
                 // Determine the probability of each event occurring
-                double outOfGasProbability = 1 / 50 * (100);
-                double flatTireProbability = 2 / 50 * (100);
-                double birdInWindshieldProbability = 5 / 50 * (100);
-                double engineProblemProbability = 6 / 50 * (100); //set right number after tests 10/50
-                int rand = new Random().Next(0, 12); //set right number after tests (0,50)
+                double outOfGasProbability = 35 / 50 * (100); // to update: 1/50
+                double flatTireProbability = 40 / 50 * (100); // to update: 2/50
+                double birdInWindshieldProbability = 45 / 50 * (100); //to update:  5/50
+                double engineProblemProbability = 50 / 50 * (100); // to update: 10/50
+                int rand = new Random().Next(0, 100); //set right number after tests (0,100)
 
                 //randon method to call event
                 var events = race.RandEvents;
                 var randomEventIndex = new Random().Next(0, events.Count);
                 var randomEvent = events[randomEventIndex];
+
                 if (
                     rand <= outOfGasProbability &&
                     randomEvent == events.Find(e => e is OutOfGasEvent)
@@ -68,58 +69,92 @@ namespace CarRacingSimulator
                     && randomEvent == events.Find(e => e is BirdInWindshieldEvent)
                     )
                 {
-                    Console.ForegroundColor = ConsoleColor.DarkYellow;
                     await randomEvent.Apply(car);
-                    // Add the random event penalty to both the elapsed and remaining time
-                    timeRemaining += randomEvent.PenaltyTime;
+                    // Add the random event penalty to the elapsed time
+                    //race.TimeRemaining += randomEvent.PenaltyTime;
                     timeElapsed += randomEvent.PenaltyTime;
                 }
+
                 if (
                     rand <= engineProblemProbability
                     && randomEvent == events.Find(e => e is EngineProblemEvent)
                 )
                 {
-                    race.TimeRemaining = timeRemaining;
-                    Console.ForegroundColor = ConsoleColor.DarkYellow;
                     await randomEvent.Apply(car);
                     // Add the random event penalty to both the elapsed and remaining time
-                    timeRemaining += randomEvent.PenaltyTime;
+                    //race.TimeRemaining += randomEvent.PenaltyTime;
                     timeElapsed += randomEvent.PenaltyTime;
                 }
-                Console.ResetColor();
             };
 
             // Set the finish time for the car
             race.SecondsToFinish = timeElapsed;
-            Console.WriteLine($"{car.Name} finished the race and took {timeElapsed} seconds to complete it.");
+            Console.WriteLine($"\n\t{car?.Name?.ToUpper()} finished the race and took {timeElapsed} seconds to complete it.");
         }
 
-        private static async Task DefineWinner(Race race1, Race race2, Race race3)
+        private static async Task DefineWinner(Race race1, Race race2, Race race3, Car car1, Car car2, Car car3)
         {
             // Determine which car finished first
             int timeSpentRace1 = race1.SecondsToFinish;
             int timeSpentRace2 = race2.SecondsToFinish;
             int timeSpentRace3 = race3.SecondsToFinish;
-            var winner = timeSpentRace1 < timeSpentRace2 || timeSpentRace1 < timeSpentRace3 ? "Velocity Turtle" : (timeSpentRace2 < timeSpentRace1 || timeSpentRace2 < timeSpentRace3 ? "Speed Racer" : "Slow Bunny");
+
+            // Determine the winner of the race
+            string? winner;
+            if (timeSpentRace1 < timeSpentRace2 && timeSpentRace1 < timeSpentRace3)
+            {
+                winner = car1.Name;
+            }
+            else if (timeSpentRace2 < timeSpentRace1 && timeSpentRace2 < timeSpentRace3)
+            {
+                winner = car2.Name;
+            }
+            else
+            {
+                winner = car3.Name;
+            }
 
             await Task.Delay(TimeSpan.FromSeconds(2));
-            if (timeSpentRace1 == timeSpentRace2)
+            if (timeSpentRace1 == timeSpentRace2 ||
+                timeSpentRace1 == timeSpentRace3 ||
+                timeSpentRace2 == timeSpentRace3)
             {
-                Console.WriteLine($"Tie! No winners!");
+                var tieMessage = "";
+
+                if (timeSpentRace1 == timeSpentRace2 && timeSpentRace1 < timeSpentRace3)
+                {
+                    tieMessage = $"{car1.Name} and {car2.Name}. They finished in {timeSpentRace1} seconds";
+                }
+                else if (timeSpentRace1 == timeSpentRace3 && timeSpentRace1 < timeSpentRace2)
+                {
+                    tieMessage = $"{car1.Name} and {car3.Name}. They finished in {timeSpentRace1} seconds";
+                }
+                else if (timeSpentRace2 == timeSpentRace3 && timeSpentRace2 < timeSpentRace1)
+                {
+                    tieMessage = $"{car2.Name} and {car3.Name}. They finished in {timeSpentRace2} seconds";
+                }
+                else
+                {
+                    tieMessage = $"{car1.Name}, {car2.Name} and {car3.Name}. They finished in {timeSpentRace1} seconds";
+                }
+
+                Console.ForegroundColor = ConsoleColor.Magenta;
+                Console.WriteLine($"\n\tTie between {tieMessage} !");
+                Console.ResetColor();
             }
             else
             {
                 Console.ForegroundColor = ConsoleColor.Magenta;
-                Console.WriteLine($"{winner} won the race! CONGRATS!!");
+                Console.WriteLine($"\n\t{winner} won the race! CONGRATS!!");
                 Console.ResetColor();
             }
         }
 
         private static async Task WaitForEvent(int timeToWait, Car car)
         {
-            Console.ForegroundColor = ConsoleColor.White;
             await Task.Delay(TimeSpan.FromSeconds(timeToWait));
-            Console.WriteLine($"{car?.Name?.ToUpper()} took the {timeToWait}s turn smoothly without losing too much momentum.");
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine($"\n{car?.Name?.ToUpper()} took the turn smoothly without losing too much momentum.");
             Console.ResetColor();
         }
     }
