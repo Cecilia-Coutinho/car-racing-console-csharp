@@ -29,7 +29,6 @@ namespace CarRacingSimulator
 
             // Print the end of the race
             Console.WriteLine("\nRace Finished!");
-            //
         }
 
         public static async Task StartRace(Car car, Race race)
@@ -47,11 +46,11 @@ namespace CarRacingSimulator
                 timeElapsed += timeToWait;
 
                 // Determine the probability of each event occurring
-                double outOfGasProbability = 50 / 50 * (100); // to update: 1/50
+                double outOfGasProbability = 35 / 50 * (100); // to update: 1/50
                 double flatTireProbability = 40 / 50 * (100); // to update: 2/50
-                double birdInWindshieldProbability = 45 / 50 * (100); //to update:  5/50
+                double birdInWindshieldProbability = 50 / 50 * (100); //to update:  5/50
                 double engineProblemProbability = 35 / 50 * (100); // to update: 10/50
-                int rand = new Random().Next(0, 100); //set right number after tests (0,100)
+                int rand = new Random().Next(0, 100);
 
                 //randon method to call event
                 var events = race.RandEvents;
@@ -100,57 +99,49 @@ namespace CarRacingSimulator
             int timeSpentRace3 = race3.SecondsToFinish;
 
             // Determine the winner of the race
-            string? winner = "";
+            string? winner;
+            string winnerMessage = $"";
 
             if (timeSpentRace1 < timeSpentRace2 && timeSpentRace1 < timeSpentRace3)
             {
                 winner = car1.Name;
+                winnerMessage = $"{winner} won the race! CONGRATS!!";
             }
             else if (timeSpentRace2 < timeSpentRace1 && timeSpentRace2 < timeSpentRace3)
             {
                 winner = car2.Name;
+                winnerMessage = $"{winner} won the race! CONGRATS!!";
             }
             else if (timeSpentRace3 < timeSpentRace1 && timeSpentRace3 < timeSpentRace2)
             {
                 winner = car3.Name;
+                winnerMessage = $"{winner} won the race! CONGRATS!!";
             }
             else
             {
-                if (timeSpentRace1 == timeSpentRace2 ||
-                timeSpentRace1 == timeSpentRace3 ||
-                timeSpentRace2 == timeSpentRace3)
+                if (timeSpentRace1 == timeSpentRace2 &&
+                    timeSpentRace1 == timeSpentRace3 &&
+                    timeSpentRace2 == timeSpentRace3)
                 {
-                    var tieMessage = "";
-
-                    if (timeSpentRace1 == timeSpentRace2 &&
-                       timeSpentRace1 == timeSpentRace3 &&
-                       timeSpentRace2 == timeSpentRace3)
-                    {
-                        tieMessage = $"{car1.Name}, {car2.Name} and {car3.Name}. They finished in {timeSpentRace1}";
-                    }
-                    if (timeSpentRace1 == timeSpentRace2 && timeSpentRace1 < timeSpentRace3)
-                    {
-                        tieMessage = $"{car1.Name} and {car2.Name}. They finished in {timeSpentRace1}";
-                    }
-                    if (timeSpentRace1 == timeSpentRace3 && timeSpentRace1 < timeSpentRace2)
-                    {
-                        tieMessage = $"{car1.Name} and {car3.Name}. They finished in {timeSpentRace1}";
-                    }
-                    if (timeSpentRace2 == timeSpentRace3 && timeSpentRace2 < timeSpentRace1)
-                    {
-                        tieMessage = $"{car2.Name} and {car3.Name}. They finished in {timeSpentRace2}";
-                    }
-
-                    await Task.Delay(TimeSpan.FromSeconds(2));
-                    Console.ForegroundColor = ConsoleColor.Magenta;
-                    Console.WriteLine($"\n\tTie between {tieMessage} seconds!");
-                    Console.ResetColor();
+                    winnerMessage = $"Tie between {car1.Name}, {car2.Name} and {car3.Name}. They finished in {timeSpentRace1} seconds!";
+                }
+                if (timeSpentRace1 == timeSpentRace2 && timeSpentRace1 < timeSpentRace3)
+                {
+                    winnerMessage = $"Tie between {car1.Name} and {car2.Name}. They finished in {timeSpentRace1} seconds!";
+                }
+                if (timeSpentRace1 == timeSpentRace3 && timeSpentRace1 < timeSpentRace2)
+                {
+                    winnerMessage = $"Tie between {car1.Name} and {car3.Name}. They finished in {timeSpentRace1} seconds!";
+                }
+                if (timeSpentRace2 == timeSpentRace3 && timeSpentRace2 < timeSpentRace1)
+                {
+                    winnerMessage = $"Tie between {car2.Name} and {car3.Name}. They finished in {timeSpentRace2} seconds!";
                 }
             }
 
             await Task.Delay(TimeSpan.FromSeconds(2));
             Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.WriteLine($"\n\t{winner} won the race! CONGRATS!!");
+            Console.WriteLine($"\n\t{winnerMessage}");
             Console.ResetColor();
         }
 
