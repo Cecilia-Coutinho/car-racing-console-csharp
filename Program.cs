@@ -12,6 +12,8 @@ namespace CarRacingSimulator
             await RunRace();
             Console.WriteLine("Do you want start a new Car Racing?");
             //to do: add option to choose: restart Y/N
+            //
+            //
         }
 
         public static async Task RunRace()
@@ -47,7 +49,7 @@ namespace CarRacingSimulator
         public static async Task StartRace(Race race)
         {
             race.TimeRemaining = Race.DistanceTakeInSec(race.DefaultSpeed, race.DefaultDistance); //How long will take to finish the race
-            double timeElapsed = race.StartSpeed; //How long it took to finish
+            decimal timeElapsed = race.StartSpeed; //How long it took to finish
             var car = race.carOnTheRace;
 
             // Loop until the race is finished
@@ -60,10 +62,10 @@ namespace CarRacingSimulator
                 timeElapsed += timeToWait;
 
                 // Determine the probability of each event occurring
-                double outOfGasProbability = 50 / 50 * (100); // to update: 1/50
-                double flatTireProbability = 40 / 50 * (100); // to update: 2/50
-                double birdInWindshieldProbability = 40 / 50 * (100); //to update:  5/50
-                double engineProblemProbability = 50 / 50 * (100); // to update: 10/50
+                decimal outOfGasProbability = 45 / 50 * (100); // to update: 1/50
+                decimal flatTireProbability = 40 / 50 * (100); // to update: 2/50
+                decimal birdInWindshieldProbability = 40 / 50 * (100); //to update:  5/50
+                decimal engineProblemProbability = 50 / 50 * (100); // to update: 10/50
                 int rand = new Random().Next(0, 100);
 
                 //randon method to call event
@@ -93,26 +95,26 @@ namespace CarRacingSimulator
                 {
                     await randomEvent.Apply(race);
                     // Add the random event penalty to both the elapsed and remaining time
-                    //race.TimeRemaining += randomEvent.PenaltyTime;
-                    timeElapsed += randomEvent.PenaltyTime;
+                    race.TimeRemaining = EngineProblemEvent.SpeedReductionPenalty(race);
+                    //timeElapsed += penaltyTime;
                 }
             };
 
             // Set the finish time for the car
             race.SecondsToFinish = timeElapsed;
-            Console.WriteLine($"\n\t|> |> |> {car?.Name?.ToUpper()} finished the race and took {timeElapsed} seconds to complete it.");
+            Console.WriteLine($"\n\t|> |> |> {car?.Name?.ToUpper()} finished the race and took {timeElapsed.ToString("F")} seconds to complete it.");
         }
 
         private static async Task DefineWinner(List<Race> races)
         {
             List<string> winners = new();
             string winnerMessage = $"";
-            double minTime = double.MaxValue;
+            decimal minTime = decimal.MaxValue;
 
             // Find the minimum time across all races and add winners
             foreach (var race in races)
             {
-                double timeSpentRace = race.SecondsToFinish;
+                decimal timeSpentRace = race.SecondsToFinish;
 
                 if (timeSpentRace < minTime)
                 {
@@ -133,11 +135,11 @@ namespace CarRacingSimulator
                 {
                     // If there is a tie, concatenate the winners into a string
                     string winnersTie = string.Join(", ", winners);
-                    winnerMessage = $"Tie between: {winnersTie.ToUpper()}. They finished in {minTime} seconds!";
+                    winnerMessage = $"Tie between: {winnersTie.ToUpper()}. They finished in {minTime.ToString("F")} seconds!";
                 }
                 else if (winners.Count == 1)
                 {
-                    winnerMessage = $"{winners[0].ToUpper()} won the race and took {minTime} seconds! CONGRATS!!";
+                    winnerMessage = $"{winners[0].ToUpper()} won the race and took {minTime.ToString("F")} seconds! CONGRATS!!";
                 }
                 else
                 {
