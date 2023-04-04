@@ -1,5 +1,7 @@
 ﻿using CarRacingSimulator.Models;
 using System;
+using System.Diagnostics;
+using System.Runtime.ConstrainedExecution;
 
 namespace CarRacingSimulator
 {
@@ -7,34 +9,46 @@ namespace CarRacingSimulator
     {
         static async Task Main(string[] args)
         {
+            await RunRace();
+            Console.WriteLine("Do you want start a new Car Racing?");
+            //to do: add option to choose: restart Y/N
+        }
+
+        public static async Task RunRace()
+        {
             Car velocityTurtle = new Car("Velocity Turtle");
             Car speedRacer = new Car("Speed Racer");
             Car slowBunny = new Car("Slow Bunny");
 
-            Race race1 = new Race();
-            Race race2 = new Race();
-            Race race3 = new Race();
+            List<Race> races = new List<Race>();
+            Race race1 = new Race(velocityTurtle);
+            Race race2 = new Race(speedRacer);
+            Race race3 = new Race(slowBunny);
+            races.Add(race1);
+            races.Add(race2);
+            races.Add(race3);
 
             Console.WriteLine($"\nStarting race...\n");
 
-            // Start both races concurrently using Task.WhenAll
+            // Start all races concurrently using Task.WhenAll
             await Task.WhenAll(
-                StartRace(velocityTurtle, race1),
-                StartRace(speedRacer, race2),
-                StartRace(slowBunny, race3)
+                StartRace(race1),
+                StartRace(race2),
+                StartRace(race3)
             );
 
             // Determine the winner and print the result
-            await DefineWinner(race1, race2, race3, velocityTurtle, speedRacer, slowBunny);
+            await DefineWinner(races);
 
             // Print the end of the race
             Console.WriteLine("\nRace Finished!");
         }
 
-        public static async Task StartRace(Car car, Race race)
+        public static async Task StartRace(Race race)
         {
             race.TimeRemaining = Race.DistanceTakeInSec(race.DefaultSpeed, race.DefaultDistance); //How long will take to finish the race
-            int timeElapsed = race.StartSpeed; //How long it took to finish
+            double timeElapsed = race.StartSpeed; //How long it took to finish
+            var car = race.carOnTheRace;
 
             // Loop until the race is finished
             while (race.TimeRemaining > 0)
@@ -46,10 +60,10 @@ namespace CarRacingSimulator
                 timeElapsed += timeToWait;
 
                 // Determine the probability of each event occurring
-                double outOfGasProbability = 35 / 50 * (100); // to update: 1/50
+                double outOfGasProbability = 50 / 50 * (100); // to update: 1/50
                 double flatTireProbability = 40 / 50 * (100); // to update: 2/50
-                double birdInWindshieldProbability = 50 / 50 * (100); //to update:  5/50
-                double engineProblemProbability = 35 / 50 * (100); // to update: 10/50
+                double birdInWindshieldProbability = 40 / 50 * (100); //to update:  5/50
+                double engineProblemProbability = 50 / 50 * (100); // to update: 10/50
                 int rand = new Random().Next(0, 100);
 
                 //randon method to call event
@@ -68,9 +82,7 @@ namespace CarRacingSimulator
                     && randomEvent == events.Find(e => e is BirdInWindshieldEvent)
                     )
                 {
-                    await randomEvent.Apply(car);
-                    // Add the random event penalty to the elapsed time
-                    //race.TimeRemaining += randomEvent.PenaltyTime;
+                    await randomEvent.Apply(race);
                     timeElapsed += randomEvent.PenaltyTime;
                 }
 
@@ -79,7 +91,7 @@ namespace CarRacingSimulator
                     && randomEvent == events.Find(e => e is EngineProblemEvent)
                 )
                 {
-                    await randomEvent.Apply(car);
+                    await randomEvent.Apply(race);
                     // Add the random event penalty to both the elapsed and remaining time
                     //race.TimeRemaining += randomEvent.PenaltyTime;
                     timeElapsed += randomEvent.PenaltyTime;
@@ -88,57 +100,53 @@ namespace CarRacingSimulator
 
             // Set the finish time for the car
             race.SecondsToFinish = timeElapsed;
-            Console.WriteLine($"\n\t{car?.Name?.ToUpper()} finished the race and took {timeElapsed} seconds to complete it.");
+            Console.WriteLine($"\n\t|> |> |> {car?.Name?.ToUpper()} finished the race and took {timeElapsed} seconds to complete it.");
         }
 
-        private static async Task DefineWinner(Race race1, Race race2, Race race3, Car car1, Car car2, Car car3)
+        private static async Task DefineWinner(List<Race> races)
         {
-            // Determine which car finished first
-            int timeSpentRace1 = race1.SecondsToFinish;
-            int timeSpentRace2 = race2.SecondsToFinish;
-            int timeSpentRace3 = race3.SecondsToFinish;
-
-            // Determine the winner of the race
-            string? winner;
+            List<string> winners = new();
             string winnerMessage = $"";
+            double minTime = double.MaxValue;
 
-            if (timeSpentRace1 < timeSpentRace2 && timeSpentRace1 < timeSpentRace3)
+            // Find the minimum time across all races and add winners
+            foreach (var race in races)
             {
-                winner = car1.Name;
-                winnerMessage = $"{winner} won the race! CONGRATS!!";
-            }
-            else if (timeSpentRace2 < timeSpentRace1 && timeSpentRace2 < timeSpentRace3)
-            {
-                winner = car2.Name;
-                winnerMessage = $"{winner} won the race! CONGRATS!!";
-            }
-            else if (timeSpentRace3 < timeSpentRace1 && timeSpentRace3 < timeSpentRace2)
-            {
-                winner = car3.Name;
-                winnerMessage = $"{winner} won the race! CONGRATS!!";
-            }
-            else
-            {
-                if (timeSpentRace1 == timeSpentRace2 &&
-                    timeSpentRace1 == timeSpentRace3 &&
-                    timeSpentRace2 == timeSpentRace3)
+                double timeSpentRace = race.SecondsToFinish;
+
+                if (timeSpentRace < minTime)
                 {
-                    winnerMessage = $"Tie between {car1.Name}, {car2.Name} and {car3.Name}. They finished in {timeSpentRace1} seconds!";
+                    minTime = timeSpentRace;
+                    winners.Clear();
                 }
-                if (timeSpentRace1 == timeSpentRace2 && timeSpentRace1 < timeSpentRace3)
+
+                if (race.SecondsToFinish == minTime)
                 {
-                    winnerMessage = $"Tie between {car1.Name} and {car2.Name}. They finished in {timeSpentRace1} seconds!";
-                }
-                if (timeSpentRace1 == timeSpentRace3 && timeSpentRace1 < timeSpentRace2)
-                {
-                    winnerMessage = $"Tie between {car1.Name} and {car3.Name}. They finished in {timeSpentRace1} seconds!";
-                }
-                if (timeSpentRace2 == timeSpentRace3 && timeSpentRace2 < timeSpentRace1)
-                {
-                    winnerMessage = $"Tie between {car2.Name} and {car3.Name}. They finished in {timeSpentRace2} seconds!";
+                    winners.Add(race.carOnTheRace.Name);
                 }
             }
 
+            // Determine winner and format message
+            for (int i = 0; i < winners.Count; i++)
+            {
+                if (winners.Count >= 2)
+                {
+                    // If there is a tie, concatenate the winners into a string
+                    string winnersTie = string.Join(", ", winners);
+                    winnerMessage = $"Tie between: {winnersTie.ToUpper()}. They finished in {minTime} seconds!";
+                }
+                else if (winners.Count == 1)
+                {
+                    winnerMessage = $"{winners[0].ToUpper()} won the race and took {minTime} seconds! CONGRATS!!";
+                }
+                else
+                {
+                    // If there are no winners, something went wrong
+                    winnerMessage = "No winner found.";
+                }
+            }
+
+            // Print the winner message and delay for a configurable amount of time
             await Task.Delay(TimeSpan.FromSeconds(2));
             Console.ForegroundColor = ConsoleColor.Magenta;
             Console.WriteLine($"\n\t{winnerMessage}");
@@ -148,6 +156,7 @@ namespace CarRacingSimulator
         private static async Task WaitForEvent(int timeToWait, Car car)
         {
             await Task.Delay(TimeSpan.FromSeconds(timeToWait));
+            Console.ResetColor();
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine($"\n{car?.Name?.ToUpper()} took the turn smoothly without losing too much momentum.");
             Console.ResetColor();

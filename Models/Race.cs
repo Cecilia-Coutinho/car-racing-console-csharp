@@ -6,8 +6,8 @@
         public int DefaultSpeed { get; set; } = 120; //km/h
         static int HourInSeconds { get; } = 3600; //1h
         public int StartSpeed { get; } = 0; //always starts with 0
-        public int SecondsToFinish { get; set; }
-        public int TimeRemaining { get; set; }
+        public double SecondsToFinish { get; set; }
+        public double TimeRemaining { get; set; }
 
         public List<IEvent> RandEvents = new List<IEvent>()
         {
@@ -17,11 +17,18 @@
             new EngineProblemEvent()
         };
 
-        public static int DistanceTakeInSec(int speed, int distance)
+        public Car carOnTheRace { get; set; }
+
+        public Race(Car car)
+        {
+            carOnTheRace = car;
+        }
+
+        public static double DistanceTakeInSec(double speed, double distance)
         {
             //calculate how long takes total distance in seconds
-            double time = (double)distance / (double)speed * (HourInSeconds);
-            return (int)time;
+            double time = distance / speed * (HourInSeconds);
+            return time;
         }
     }
 }
