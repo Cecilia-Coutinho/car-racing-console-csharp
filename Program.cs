@@ -52,11 +52,11 @@ namespace CarRacingSimulator
             race.TimeRemaining = Race.DistanceTakeInSec(race.Speed, race.Distance); //How long will take to finish the race
             TimeSpan timeElapsed = TimeSpan.FromSeconds((double)race.StartSpeed); //How long it took to finish
             var car = race.carOnTheRace;
-
+            bool isTimeRemaining = race.TimeRemaining.TotalSeconds > 0;
             Console.WriteLine($"Time remaining {car.Name}: {race.TimeRemaining.ToString("hh\\:mm\\:ss")}");
 
             // Loop until the race is finished
-            while (race.TimeRemaining.TotalSeconds > 0)
+            while (isTimeRemaining)
             {
                 // Wait for 30 seconds before the next move
                 TimeSpan timeToWait = TimeSpan.FromSeconds(30);
@@ -98,18 +98,22 @@ namespace CarRacingSimulator
                     && randomEvent == events.Find(e => e is EngineProblemEvent)
                 )
                 {
-                    if (race.TimeRemaining.TotalSeconds > 0)
+                    if (race.TimeRemaining >= timeToWait)
                     {
                         await randomEvent.Apply(race);
-                        // Add the random event penalty to both the elapsed and remaining time
+                        // Update remaining time
                         race.TimeRemaining = EngineProblemEvent.SpeedReductionPenalty(race);
-                        if (race.TimeRemaining.TotalSeconds > 0 || race.TimeRemaining < timeToWait)
-                        {
-                            timeElapsed += race.TimeRemaining;
-                        }
-
                     }
                 }
+
+                if (race.TimeRemaining < timeToWait)
+                {
+                    timeElapsed += race.TimeRemaining;
+                    await Task.Delay(TimeSpan.FromSeconds(race.TimeRemaining.TotalSeconds));
+                    isTimeRemaining = false;
+                }
+
+
             };
 
             // Set the finish time for the car
@@ -122,12 +126,11 @@ namespace CarRacingSimulator
             List<string> winners = new();
             string winnerMessage = $"";
             double minTime = double.MaxValue;
-            TimeSpan timeSpentRace = TimeSpan.FromSeconds(0);
 
             // Find the minimum time across all races and add winners
             foreach (var race in races)
             {
-                timeSpentRace = race.TimeElapsed;
+                TimeSpan timeSpentRace = race.TimeElapsed;
 
                 if (timeSpentRace.TotalSeconds < minTime)
                 {
@@ -148,11 +151,11 @@ namespace CarRacingSimulator
                 {
                     // If there is a tie, concatenate the winners into a string
                     string winnersTie = string.Join(", ", winners);
-                    winnerMessage = $"Tie between: {winnersTie.ToUpper()}. They finished in {timeSpentRace.ToString("hh\\:mm\\:ss")}!";
+                    winnerMessage = $"Tie between: {winnersTie.ToUpper()}. They finished in {TimeSpan.FromSeconds(minTime)}!";
                 }
                 else if (winners.Count == 1)
                 {
-                    winnerMessage = $"{winners[0].ToUpper()} won the race and took {timeSpentRace.ToString("hh\\:mm\\:ss")}! CONGRATS!!";
+                    winnerMessage = $"{winners[0].ToUpper()} won the race and took {TimeSpan.FromSeconds(minTime)}! CONGRATS!!";
                 }
                 else
                 {

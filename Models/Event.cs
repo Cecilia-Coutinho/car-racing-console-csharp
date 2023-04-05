@@ -82,21 +82,14 @@ namespace CarRacingSimulator.Models
                 race.Speed -= 5;
             }
 
-            if (race.TimeRemaining.TotalSeconds <= double.MaxValue)
+            double speedInSec = (double)race.Speed / (double)Race.HourInSeconds;
+            double newDistance = speedInSec * race.TimeRemaining.TotalSeconds;
+            //int newDistanceInKm = (int)Math.Round(newDistance);
+            if (newDistance < 0)
             {
-                double speedInSec = (double)race.Speed / (double)Race.HourInSeconds;
-                double newDistance = speedInSec * race.TimeRemaining.TotalSeconds;
-                //int newDistanceInKm = (int)Math.Round(newDistance);
-                if (newDistance < 0)
-                {
-                    newDistance = 1; //1km takes 30sec
-                }
-                race.Distance = (int)Math.Round(newDistance);
+                newDistance = 1; //1km takes 30sec
             }
-            else
-            {
-                Console.WriteLine("Error: the time remaining for this race is too long.");
-            }
+            race.Distance = (int)Math.Round(newDistance);
 
             double timeInSec = ((double)race.Distance / race.Speed) * 3600;
             TimeSpan time = TimeSpan.FromSeconds(timeInSec);
