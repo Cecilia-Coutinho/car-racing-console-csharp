@@ -1,4 +1,5 @@
 ﻿using CarRacingSimulator.Models;
+using CarRacingSimulator.Models.CarRacingSimulator.Models;
 using System;
 using System.Diagnostics;
 using System.Runtime.ConstrainedExecution;
@@ -48,18 +49,22 @@ namespace CarRacingSimulator
 
         public static async Task StartRace(Race race)
         {
-            race.TimeRemaining = Race.DistanceTakeInSec(race.DefaultSpeed, race.DefaultDistance); //How long will take to finish the race
-            decimal timeElapsed = race.StartSpeed; //How long it took to finish
+            race.TimeRemaining = Race.DistanceTakeInSec(race.Speed, race.Distance); //How long will take to finish the race
+            TimeSpan timeElapsed = TimeSpan.FromSeconds((double)race.StartSpeed); //How long it took to finish
             var car = race.carOnTheRace;
 
+            Console.WriteLine($"Time remaining {car.Name}: {race.TimeRemaining.ToString("hh\\:mm\\:ss")}");
+
             // Loop until the race is finished
-            while (race.TimeRemaining > 0)
+            while (race.TimeRemaining.TotalSeconds > 0)
             {
                 // Wait for 30 seconds before the next move
-                int timeToWait = 30;
+                TimeSpan timeToWait = TimeSpan.FromSeconds(30);
                 await WaitForEvent(timeToWait, car);
                 race.TimeRemaining -= timeToWait;
                 timeElapsed += timeToWait;
+
+                Console.WriteLine($"Time remaining {car.Name}: {race.TimeRemaining.ToString("hh\\:mm\\:ss")}");
 
                 // Determine the probability of each event occurring
                 decimal outOfGasProbability = 45 / 50 * (100); // to update: 1/50
@@ -93,36 +98,44 @@ namespace CarRacingSimulator
                     && randomEvent == events.Find(e => e is EngineProblemEvent)
                 )
                 {
-                    await randomEvent.Apply(race);
-                    // Add the random event penalty to both the elapsed and remaining time
-                    race.TimeRemaining = EngineProblemEvent.SpeedReductionPenalty(race);
-                    //timeElapsed += penaltyTime;
+                    if (race.TimeRemaining.TotalSeconds > 0)
+                    {
+                        await randomEvent.Apply(race);
+                        // Add the random event penalty to both the elapsed and remaining time
+                        race.TimeRemaining = EngineProblemEvent.SpeedReductionPenalty(race);
+                        if (race.TimeRemaining.TotalSeconds > 0 || race.TimeRemaining < timeToWait)
+                        {
+                            timeElapsed += race.TimeRemaining;
+                        }
+
+                    }
                 }
             };
 
             // Set the finish time for the car
-            race.SecondsToFinish = timeElapsed;
-            Console.WriteLine($"\n\t|> |> |> {car?.Name?.ToUpper()} finished the race and took {timeElapsed.ToString("F")} seconds to complete it.");
+            race.TimeElapsed = timeElapsed;
+            Console.WriteLine($"\n\t|> |> |> {car?.Name?.ToUpper()} finished the race and took {race.TimeElapsed.ToString("hh\\:mm\\:ss")} to complete it.");
         }
 
         private static async Task DefineWinner(List<Race> races)
         {
             List<string> winners = new();
             string winnerMessage = $"";
-            decimal minTime = decimal.MaxValue;
+            double minTime = double.MaxValue;
+            TimeSpan timeSpentRace = TimeSpan.FromSeconds(0);
 
             // Find the minimum time across all races and add winners
             foreach (var race in races)
             {
-                decimal timeSpentRace = race.SecondsToFinish;
+                timeSpentRace = race.TimeElapsed;
 
-                if (timeSpentRace < minTime)
+                if (timeSpentRace.TotalSeconds < minTime)
                 {
-                    minTime = timeSpentRace;
+                    minTime = timeSpentRace.TotalSeconds;
                     winners.Clear();
                 }
 
-                if (race.SecondsToFinish == minTime)
+                if (race.TimeElapsed.TotalSeconds == minTime)
                 {
                     winners.Add(race.carOnTheRace.Name);
                 }
@@ -135,11 +148,11 @@ namespace CarRacingSimulator
                 {
                     // If there is a tie, concatenate the winners into a string
                     string winnersTie = string.Join(", ", winners);
-                    winnerMessage = $"Tie between: {winnersTie.ToUpper()}. They finished in {minTime.ToString("F")} seconds!";
+                    winnerMessage = $"Tie between: {winnersTie.ToUpper()}. They finished in {timeSpentRace.ToString("hh\\:mm\\:ss")}!";
                 }
                 else if (winners.Count == 1)
                 {
-                    winnerMessage = $"{winners[0].ToUpper()} won the race and took {minTime.ToString("F")} seconds! CONGRATS!!";
+                    winnerMessage = $"{winners[0].ToUpper()} won the race and took {timeSpentRace.ToString("hh\\:mm\\:ss")}! CONGRATS!!";
                 }
                 else
                 {
@@ -155,9 +168,9 @@ namespace CarRacingSimulator
             Console.ResetColor();
         }
 
-        private static async Task WaitForEvent(int timeToWait, Car car)
+        private static async Task WaitForEvent(TimeSpan timeToWait, Car car)
         {
-            await Task.Delay(TimeSpan.FromSeconds(timeToWait));
+            await Task.Delay(timeToWait);
             Console.ResetColor();
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine($"\n{car?.Name?.ToUpper()} took the turn smoothly without losing too much momentum.");
