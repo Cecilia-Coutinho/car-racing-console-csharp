@@ -1,4 +1,6 @@
-﻿namespace CarRacingSimulator.Models
+﻿using System.Diagnostics;
+
+namespace CarRacingSimulator.Models
 {
     namespace CarRacingSimulator.Models
     {
@@ -26,12 +28,33 @@
                 carOnTheRace = car;
             }
 
-            public static TimeSpan DistanceTakeInSec(int speed, int distance)
+            public static TimeSpan DistanceTakeInSec(int speed, double distance)
             {
                 //calculate how long takes total distance in seconds
-                double timeInHours = (double)distance / speed;
+                double timeInHours = distance / speed;
                 TimeSpan time = TimeSpan.FromSeconds(timeInHours * HourInSeconds);
                 return time;
+            }
+            public static int UpdateDistance(Race race)
+            {
+                double speed = (double)race.Speed;
+                double secondsPerHour = (double)Race.HourInSeconds;
+                TimeSpan timeRemaining = race.TimeRemaining;
+
+                //update distance
+                double speedInSec = speed / secondsPerHour;
+                double newDistance = speedInSec * timeRemaining.TotalSeconds;
+                race.Distance = (int)Math.Round(newDistance);
+                return race.Distance;
+            }
+
+            public static void UpdateRemainingTime(Race race, double speed)
+            {
+                double newDistance = (double)Race.UpdateDistance(race);
+                double timeInSec = (newDistance / speed) * Race.HourInSeconds;
+                int newRemainingTime = (int)Math.Round(timeInSec);
+                TimeSpan time = TimeSpan.FromSeconds(newRemainingTime);
+                race.TimeRemaining = time;
             }
         }
 

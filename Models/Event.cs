@@ -24,7 +24,6 @@ namespace CarRacingSimulator.Models
 
         public virtual async Task Apply(Race race)
         {
-            Console.ForegroundColor = ConsoleColor.DarkYellow;
             Console.WriteLine($"\n\t(´º_º`) {race.carOnTheRace?.Name?.ToUpper()} experienced {EventName} and needs to wait {PenaltyTime} seconds...");
             await Task.Delay(PenaltyTime);
             if (EventName != "Engine Problem")
@@ -70,7 +69,6 @@ namespace CarRacingSimulator.Models
         public EngineProblemEvent() : base("Engine Problem", penaltyTime) { }
         public override async Task Apply(Race race)
         {
-            Console.ForegroundColor = ConsoleColor.DarkYellow;
             Console.WriteLine($"\n\t(._.) {race.carOnTheRace?.Name?.ToUpper()} experienced {EventName} and reduced his speed's power...");
             SpeedReductionPenalty(race);
             await Task.Delay(penaltyTime);
@@ -85,23 +83,11 @@ namespace CarRacingSimulator.Models
                 race.Speed -= speedReduction;
             }
 
-            double newSpeed = (double)race.Speed;
-            double secondsPerHour = (double)Race.HourInSeconds;
-            TimeSpan timeRemaining = race.TimeRemaining;
-
-            //update distance
-            double speedInSec = newSpeed / secondsPerHour;
-            double newDistance = speedInSec * timeRemaining.TotalSeconds;
-            race.Distance = (int)Math.Round(newDistance);
-
             //update remaining time
-            newDistance = (double)race.Distance;
-            double timeInSec = (newDistance / newSpeed) * Race.HourInSeconds;
-            int newRemainingTime = (int)Math.Round(timeInSec);
-            TimeSpan time = TimeSpan.FromSeconds(newRemainingTime);
-            race.TimeRemaining = time;
+            Race.UpdateRemainingTime(race, (double)race.Speed);
 
-            Console.WriteLine($"\n\t{carName.ToUpper()} have extra time to finish the race at a speed of {race.Speed:F} km/h?\n\t New RemainingTime:{race.TimeRemaining.ToString("hh\\:mm\\:ss")}");
+            Console.WriteLine($"\n¯\\_('_')_/¯ {carName.ToUpper()} has extra time to finish the race at a speed of {race.Speed} km/h.");
+            //\n\tAverage time to finish: {time.ToString("hh\\:mm\\:ss")}
         }
     }
 }
