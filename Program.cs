@@ -14,6 +14,8 @@ namespace CarRacingSimulator
             await RunRace();
             Console.WriteLine("Do you want start a new Car Racing?");
             //to do: add option to choose: restart Y/N
+            //
+            //
         }
 
         public static async Task RunRace()
@@ -76,9 +78,9 @@ namespace CarRacingSimulator
 
         public static async Task StartRace(Race race)
         {
-            race.TimeRemaining = Race.DistanceTakeInSec(race.Speed, (double)race.Distance); //How long will take to finish the race
+            race.TimeRemaining = Race.DistanceTakeInSec(race.Speed, race.Distance); //How long will take to finish the race
             race.TimeElapsed = TimeSpan.FromSeconds((double)race.StartSpeed); //How long it took to finish
-            var car = race.carOnTheRace;
+            var car = race.CarOnTheRace;
             bool isTimeRemaining = race.TimeRemaining.TotalSeconds > 0;
             //Console.WriteLine($"Time remaining {car.Name}: {race.TimeRemaining.ToString("hh\\:mm\\:ss")}");
 
@@ -156,13 +158,13 @@ namespace CarRacingSimulator
                 await Task.Delay(TimeSpan.FromSeconds(1));
                 races.ForEach(race =>
                 {
-                    string carName = race.carOnTheRace.Name;
+                    string carName = race.CarOnTheRace.Name;
                     TimeSpan elapsedTime = race.TimeElapsed;
                     TimeSpan remainingTime = race.TimeRemaining;
                     int currentSpeed = race.Speed;
                     int distanceLeft = Race.UpdateDistance(race);
 
-                    Console.WriteLine($"\n{carName} has been running for {elapsedTime} and has an average time to finish in {remainingTime}" +
+                    Console.WriteLine($"\n{carName} has an elapsed time of {elapsedTime} and has an average time to finish in {remainingTime}" +
                         $"\nCurrent Speed: {currentSpeed} km/h. " +
                         $"\nDistance left: {distanceLeft} km." +
                         $"\n----------------------------------");
@@ -196,7 +198,7 @@ namespace CarRacingSimulator
 
                 if (race.TimeElapsed.TotalSeconds == minTime)
                 {
-                    winners.Add(race.carOnTheRace.Name);
+                    winners.Add(race.CarOnTheRace.Name);
                 }
             }
 
