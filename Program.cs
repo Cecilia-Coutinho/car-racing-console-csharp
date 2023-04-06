@@ -101,8 +101,6 @@ namespace CarRacingSimulator
                     if (race.TimeRemaining >= timeToWait)
                     {
                         await randomEvent.Apply(race);
-                        // Update remaining time
-                        race.TimeRemaining = EngineProblemEvent.SpeedReductionPenalty(race);
                     }
                 }
 
@@ -112,8 +110,6 @@ namespace CarRacingSimulator
                     await Task.Delay(TimeSpan.FromSeconds(race.TimeRemaining.TotalSeconds));
                     isTimeRemaining = false;
                 }
-
-
             };
 
             // Set the finish time for the car
@@ -155,7 +151,7 @@ namespace CarRacingSimulator
                 }
                 else if (winners.Count == 1)
                 {
-                    winnerMessage = $"{winners[0].ToUpper()} won the race and took {TimeSpan.FromSeconds(minTime)}! CONGRATS!!";
+                    winnerMessage = $"{winners[0].ToUpper()} won the race and took {TimeSpan.FromSeconds(minTime)} to finish it! CONGRATS!!";
                 }
                 else
                 {

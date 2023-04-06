@@ -72,40 +72,36 @@ namespace CarRacingSimulator.Models
         {
             Console.ForegroundColor = ConsoleColor.DarkYellow;
             Console.WriteLine($"\n\t(._.) {race.carOnTheRace?.Name?.ToUpper()} experienced {EventName} and reduced his speed's power...");
+            SpeedReductionPenalty(race);
             await Task.Delay(penaltyTime);
         }
-        public static TimeSpan SpeedReductionPenalty(Race race)
+        public static void SpeedReductionPenalty(Race race)
         {
             string carName = race.carOnTheRace.Name;
-            if (race.Speed > 5)
+            int speedReduction = 5;
+
+            if (race.Speed > speedReduction)
             {
-                race.Speed -= 5;
+                race.Speed -= speedReduction;
             }
 
-            double speedInSec = (double)race.Speed / (double)Race.HourInSeconds;
-            double newDistance = speedInSec * race.TimeRemaining.TotalSeconds;
-            //int newDistanceInKm = (int)Math.Round(newDistance);
-            if (newDistance < 0)
-            {
-                newDistance = 1; //1km takes 30sec
-            }
+            double newSpeed = (double)race.Speed;
+            double secondsPerHour = (double)Race.HourInSeconds;
+            TimeSpan timeRemaining = race.TimeRemaining;
+
+            //update distance
+            double speedInSec = newSpeed / secondsPerHour;
+            double newDistance = speedInSec * timeRemaining.TotalSeconds;
             race.Distance = (int)Math.Round(newDistance);
 
-            double timeInSec = ((double)race.Distance / race.Speed) * 3600;
-            TimeSpan time = TimeSpan.FromSeconds(timeInSec);
+            //update remaining time
+            newDistance = (double)race.Distance;
+            double timeInSec = (newDistance / newSpeed) * Race.HourInSeconds;
+            int newRemainingTime = (int)Math.Round(timeInSec);
+            TimeSpan time = TimeSpan.FromSeconds(newRemainingTime);
             race.TimeRemaining = time;
 
             Console.WriteLine($"\n\t{carName.ToUpper()} have extra time to finish the race at a speed of {race.Speed:F} km/h?\n\t New RemainingTime:{race.TimeRemaining.ToString("hh\\:mm\\:ss")}");
-            return race.TimeRemaining;
-
         }
-
-        //public static TimeSpan DistanceTakeInSec(int speed, int distance)
-        //{
-        //    //calculate how long takes total distance in seconds
-        //    double timeInDouble = (double)distance / speed;
-        //    TimeSpan time = TimeSpan.FromSeconds(timeInDouble * HourInSeconds);
-        //    return time;
-        //}
     }
 }

@@ -4,7 +4,7 @@
     {
         public class Race
         {
-            public int Distance { get; set; } = 3; //km
+            public int Distance { get; set; } = 10; //km
             public int Speed { get; set; } = 120; //km/h
             public static int HourInSeconds { get; } = 3600; //1h
             public int StartSpeed { get; } = 0; //always starts with 0
@@ -29,10 +29,16 @@
             public static TimeSpan DistanceTakeInSec(int speed, int distance)
             {
                 //calculate how long takes total distance in seconds
-                double timeInDouble = (double)distance / speed;
-                TimeSpan time = TimeSpan.FromSeconds(timeInDouble * HourInSeconds);
+                double timeInHours = (double)distance / speed;
+                TimeSpan time = TimeSpan.FromSeconds(timeInHours * HourInSeconds);
                 return time;
             }
         }
+
+        /*
+         * average speed = total distance / total time
+         * average time = total distance / total speed
+         * average distance = total speed * total time
+         */
     }
 }
