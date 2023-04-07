@@ -6,7 +6,7 @@ namespace CarRacingSimulator.Models
     {
         public class Race
         {
-            public int Distance { get; set; } = 10; //km
+            public int Distance { get; set; } = 3; //km
             public int Speed { get; set; } = 120; //km/h
             public static readonly int HourInSeconds = 3600; //1h
             public readonly int StartSpeed = 0; //always starts with 0
@@ -28,7 +28,7 @@ namespace CarRacingSimulator.Models
                 CarOnTheRace = car;
             }
 
-            public static TimeSpan DistanceTakeInSec(double speed, double distance)
+            public static TimeSpan DistanceTakeInSec(int speed, double distance)
             {
                 //calculate how long takes total distance in seconds
                 double timeInHours = distance / speed;
@@ -49,8 +49,8 @@ namespace CarRacingSimulator.Models
             }
             public static void UpdateRemainingTime(Race race)
             {
-                double newDistance = UpdateDistance(race);
-                double timeInSec = (newDistance / race.Speed) * HourInSeconds;
+                double distance = UpdateDistance(race);
+                double timeInSec = (distance / race.Speed) * HourInSeconds;
                 int newRemainingTime = (int)Math.Round(timeInSec);
                 TimeSpan time = TimeSpan.FromSeconds(newRemainingTime);
                 race.TimeRemaining = time;

@@ -14,23 +14,21 @@ namespace CarRacingSimulator
             await RunRace();
             Console.WriteLine("Do you want start a new Car Racing?");
             //to do: add option to choose: restart Y/N
-            //
-            //
         }
 
         public static async Task RunRace()
         {
             Console.WriteLine("\nCar Racing Console Simulator 1.0" +
-                "\nOnce the Race starts, press any key to see its status");
+                "\nOnce the Race starts, press any key to see its status and results");
 
             Car velocityTurtle = new Car("Velocity Turtle");
             Car speedRacer = new Car("Speed Racer");
             Car slowBunny = new Car("Slow Bunny");
 
             List<Race> races = new List<Race>();
-            Race race1 = new Race(velocityTurtle);
-            Race race2 = new Race(speedRacer);
-            Race race3 = new Race(slowBunny);
+            Race race1 = new(velocityTurtle);
+            Race race2 = new(speedRacer);
+            Race race3 = new(slowBunny);
             races.Add(race1);
             races.Add(race2);
             races.Add(race3);
@@ -41,33 +39,19 @@ namespace CarRacingSimulator
             // Print the start of the race
             ASCIICarRacingMessage(startMessage);
 
+            // Launch the task to wait for a keypress
+            Task consoleKeyTask = Task.Run(() => { _ = RaceStatus(new List<Race> { race1, race2, race3 }); });
+
+            // ... Launch other async tasks ...
             // Start all races concurrently using Task.WhenAll
             await Task.WhenAll(
                 StartRace(race1),
                 StartRace(race2),
-                StartRace(race3),
-                RaceStatus(new List<Race> { race1, race2, race3 })
+                StartRace(race3)
             );
 
-            //var firstCarTask = StartRace(race1);
-            //var secondCarTask = StartRace(race2);
-            //var thirdCarTask = StartRace(race3);
-            //var statusEggTask = EggStatus(new List<Egg> { firstEgg, secondEgg, thirdEgg });
-
-            //var carTasks = new List<Task> { firstCarTask, secondCarTask, thirdCarTask };
-
-            //while (carTasks.Count > 0)
-            //{
-            //    Task finishedTask = await Task.WhenAny(carTasks);
-            //    if (finishedTask == firstCarTask &&
-            //        finishedTask == secondCarTask &&
-            //        finishedTask == thirdCarTask)
-            //    {
-            //        await DefineWinner(races);
-            //    }
-            //    await finishedTask;
-            //    carTasks.Remove(finishedTask);
-            //}
+            // Waits for the keypress to end it all
+            await consoleKeyTask;
 
             // Determine the winner and print the result
             await DefineWinner(races);
@@ -78,11 +62,10 @@ namespace CarRacingSimulator
 
         public static async Task StartRace(Race race)
         {
-            race.TimeRemaining = Race.DistanceTakeInSec(race.Speed, race.Distance); //How long will take to finish the race
+            race.TimeRemaining = Race.DistanceTakeInSec(race.Speed, (double)race.Distance); //How long will take to finish the race
             race.TimeElapsed = TimeSpan.FromSeconds((double)race.StartSpeed); //How long it took to finish
             var car = race.CarOnTheRace;
             bool isTimeRemaining = race.TimeRemaining.TotalSeconds > 0;
-            //Console.WriteLine($"Time remaining {car.Name}: {race.TimeRemaining.ToString("hh\\:mm\\:ss")}");
 
             // Loop until the race is finished
             while (isTimeRemaining)
@@ -93,13 +76,11 @@ namespace CarRacingSimulator
                 race.TimeRemaining -= timeToWait;
                 race.TimeElapsed += timeToWait;
 
-                //Console.WriteLine($"Time remaining {car.Name}: {race.TimeRemaining.ToString("hh\\:mm\\:ss")}");
-
                 // Determine the probability of each event occurring
-                decimal outOfGasProbability = (30 / 50) * 100; // to update: 1/50
-                decimal flatTireProbability = (40 / 50) * 100;  // to update: 2/50
-                decimal birdInWindshieldProbability = (50 / 50) * 100;  //to update:  5/50
-                decimal engineProblemProbability = (50 / 50) * 100; ; // to update: 10/50
+                decimal outOfGasProbability = (30 / 50) * 100;
+                decimal flatTireProbability = (40 / 50) * 100;
+                decimal birdInWindshieldProbability = (50 / 50) * 100;
+                decimal engineProblemProbability = (50 / 50) * 100; ;
                 int rand = new Random().Next(0, 100);
 
                 //randon method to call event
@@ -141,6 +122,7 @@ namespace CarRacingSimulator
                 {
                     race.TimeElapsed += race.TimeRemaining;
                     await Task.Delay(TimeSpan.FromSeconds(race.TimeRemaining.TotalSeconds));
+                    race.TimeRemaining = TimeSpan.FromSeconds(0);
                     isTimeRemaining = false;
                 }
             };
@@ -151,8 +133,10 @@ namespace CarRacingSimulator
 
         public async static Task RaceStatus(List<Race> races)
         {
+            bool isRaceRunning = true;
+
             // status of all cars
-            while (true)
+            while (isRaceRunning)
             {
                 Console.ReadKey(true);
                 await Task.Delay(TimeSpan.FromSeconds(1));
@@ -174,7 +158,7 @@ namespace CarRacingSimulator
 
                 if (totalRemaining == 0)
                 {
-                    return;
+                    isRaceRunning = false;
                 }
             }
         }
