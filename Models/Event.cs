@@ -70,10 +70,10 @@ namespace CarRacingSimulator.Models
         public override async Task Apply(Race race)
         {
             Console.WriteLine($"\n\t(._.) {race.CarOnTheRace?.Name?.ToUpper()} experienced {EventName} and reduced his speed's power...");
-            SpeedReductionPenalty(race);
+            await SpeedReductionPenalty(race);
             await Task.Delay(penaltyTime);
         }
-        public static void SpeedReductionPenalty(Race race)
+        private static async Task SpeedReductionPenalty(Race race)
         {
             string carName = race.CarOnTheRace.Name;
             int speedReduction = 5;
@@ -84,7 +84,7 @@ namespace CarRacingSimulator.Models
             }
 
             //update remaining time
-            Race.UpdateRemainingTime(race);
+            await Race.UpdateRemainingTime(race);
 
             Console.WriteLine($"\n¯\\_('_')_/¯ {carName.ToUpper()} has extra time to finish the race at a speed of {race.Speed} km/h.");
         }

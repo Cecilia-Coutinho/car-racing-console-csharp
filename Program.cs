@@ -61,7 +61,7 @@ namespace CarRacingSimulator
 
         public static async Task StartRace(Race race)
         {
-            race.TimeRemaining = Race.DistanceTakeInSec(race.Speed, (double)race.Distance); //How long will take to finish the race
+            race.TimeRemaining = await Race.DistanceTakeInSec(race.Speed, (double)race.Distance); //How long will take to finish the race
             race.TimeElapsed = TimeSpan.FromSeconds((double)race.StartSpeed); //How long it took to finish
             var car = race.CarOnTheRace;
             bool isTimeRemaining = race.TimeRemaining.TotalSeconds > 0;
@@ -130,7 +130,7 @@ namespace CarRacingSimulator
             Console.WriteLine($"\n\t|> |> |> {car?.Name?.ToUpper()} finished the race and took {race.TimeElapsed.ToString("hh\\:mm\\:ss")} to complete it.");
         }
 
-        public async static Task RaceStatus(List<Race> races)
+        public static async Task RaceStatus(List<Race> races)
         {
             bool isRaceRunning = true;
 
@@ -139,13 +139,13 @@ namespace CarRacingSimulator
             {
                 Console.ReadKey(true);
                 await Task.Delay(TimeSpan.FromSeconds(1));
-                races.ForEach(race =>
+                races.ForEach(async race =>
                 {
                     string carName = race.CarOnTheRace.Name;
                     TimeSpan elapsedTime = race.TimeElapsed;
                     TimeSpan remainingTime = race.TimeRemaining;
                     int currentSpeed = race.Speed;
-                    int distanceLeft = Race.UpdateDistance(race);
+                    int distanceLeft = await Race.UpdateDistance(race);
 
                     Console.WriteLine($"\n{carName} has an elapsed time of {elapsedTime} and has an average time to finish in {remainingTime}" +
                         $"\nCurrent Speed: {currentSpeed} km/h. " +
