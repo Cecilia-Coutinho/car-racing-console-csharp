@@ -12,14 +12,14 @@ namespace CarRacingSimulator
         static async Task Main(string[] args)
         {
             await RunRace();
-            Console.WriteLine("Do you want start a new Car Racing?");
+            Console.WriteLine("Would you like to start a new Car Racing?");
             //to do: add option to choose: restart Y/N
         }
 
         public static async Task RunRace()
         {
             Console.WriteLine("\nCar Racing Console Simulator 1.0" +
-                "\nOnce the Race starts, press any key to see its status and results");
+                "\nOnce the Race starts, press any key to see its status.");
 
             Car velocityTurtle = new Car("Velocity Turtle");
             Car speedRacer = new Car("Speed Racer");
@@ -40,10 +40,9 @@ namespace CarRacingSimulator
             ASCIICarRacingMessage(startMessage);
 
             // Launch the task to wait for a keypress
-            Task consoleKeyTask = Task.Run(() => { _ = RaceStatus(new List<Race> { race1, race2, race3 }); });
+            Task consoleKeyTask = Task.Run(() => { _ = RaceStatus(races); });
 
             // ... Launch other async tasks ...
-            // Start all races concurrently using Task.WhenAll
             await Task.WhenAll(
                 StartRace(race1),
                 StartRace(race2),

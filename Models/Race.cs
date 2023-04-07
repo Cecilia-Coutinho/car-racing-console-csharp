@@ -8,21 +8,21 @@ namespace CarRacingSimulator.Models
         {
             public int Distance { get; set; } = 3; //km
             public int Speed { get; set; } = 120; //km/h
+
             public static readonly int HourInSeconds = 3600; //1h
+
             public readonly int StartSpeed = 0; //always starts with 0
             public TimeSpan TimeElapsed { get; set; }
             public TimeSpan TimeRemaining { get; set; }
 
             public List<IEvent> RandEvents = new()
-        {
-            new OutOfGasEvent(),
-            new FlatTireEvent(),
-            new BirdInWindshieldEvent(),
-            new EngineProblemEvent()
-        };
-
+            {
+                new OutOfGasEvent(),
+                new FlatTireEvent(),
+                new BirdInWindshieldEvent(),
+                new EngineProblemEvent()
+            };
             public Car CarOnTheRace { get; set; }
-
             public Race(Car car)
             {
                 CarOnTheRace = car;

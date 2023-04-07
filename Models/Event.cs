@@ -87,7 +87,6 @@ namespace CarRacingSimulator.Models
             Race.UpdateRemainingTime(race);
 
             Console.WriteLine($"\n¯\\_('_')_/¯ {carName.ToUpper()} has extra time to finish the race at a speed of {race.Speed} km/h.");
-            //\n\tAverage time to finish: {time.ToString("hh\\:mm\\:ss")}
         }
     }
 }
