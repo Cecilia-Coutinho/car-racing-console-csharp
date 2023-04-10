@@ -1,5 +1,4 @@
 # Ignore files
 bin/
 obj/
-samples/
 .vs/
