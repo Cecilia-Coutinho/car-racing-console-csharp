@@ -38,6 +38,7 @@ namespace CarRacingSimulator.Models
                     return time;
                 });
             }
+
             public static Task<int> UpdateDistance(Race race)
             {
                 return Task.Run(() =>

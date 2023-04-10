@@ -11,6 +11,8 @@ namespace CarRacingSimulator.Models
         TimeSpan PenaltyTime { get; }
         Task Apply(Race race);
     }
+
+    //implement the interface
     public abstract class EventBase : IEvent
     {
         // default implementations for common methods to reduce duplication 
@@ -24,8 +26,11 @@ namespace CarRacingSimulator.Models
 
         public virtual async Task Apply(Race race)
         {
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
             Console.WriteLine($"\n\t(´º_º`) {race.CarOnTheRace?.Name?.ToUpper()} experienced {EventName} and needs to wait {PenaltyTime} seconds...");
+            Console.ResetColor();
             await Task.Delay(PenaltyTime);
+
             if (EventName != "Engine Problem")
             {
                 Console.WriteLine($"\n( ^_^) Look who's back and ready to roll - it's {race.CarOnTheRace?.Name?.ToUpper()}! Watch out, everyone else, this car is coming in hot!");
@@ -69,9 +74,10 @@ namespace CarRacingSimulator.Models
         public EngineProblemEvent() : base("Engine Problem", penaltyTime) { }
         public override async Task Apply(Race race)
         {
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
             Console.WriteLine($"\n\t(._.) {race.CarOnTheRace?.Name?.ToUpper()} experienced {EventName} and reduced his speed's power...");
-            await SpeedReductionPenalty(race);
-            await Task.Delay(penaltyTime);
+            Console.ResetColor();
+            await Task.WhenAll(SpeedReductionPenalty(race), Task.Delay(penaltyTime));
         }
         private static async Task SpeedReductionPenalty(Race race)
         {

@@ -11,15 +11,7 @@ namespace CarRacingSimulator
     {
         static async Task Main(string[] args)
         {
-            await RunRace();
-            Console.WriteLine("Would you like to start a new Car Racing?");
-            //to do: add option to choose: restart Y/N
-        }
-
-        public static async Task RunRace()
-        {
-            Console.WriteLine("\nCar Racing Console Simulator 1.0" +
-                "\nOnce the Race starts, press any key to see its status.");
+            await BannerMessageScreen();
 
             Car velocityTurtle = new Car("Velocity Turtle");
             Car speedRacer = new Car("Speed Racer");
@@ -37,7 +29,7 @@ namespace CarRacingSimulator
             string finishMessage = "Race Finished!";
 
             // Print the start of the race
-            ASCIICarRacingMessage(startMessage);
+            await ASCIICarRacingMessage(startMessage);
 
             // Launch the task to wait for a keypress
             Task consoleKeyTask = Task.Run(() => { _ = RaceStatus(races); });
@@ -56,10 +48,10 @@ namespace CarRacingSimulator
             await DefineWinner(races);
 
             // Print the end of the race
-            ASCIICarRacingMessage(finishMessage);
+            await ASCIICarRacingMessage(finishMessage);
         }
 
-        public static async Task StartRace(Race race)
+        private static async Task StartRace(Race race)
         {
             race.TimeRemaining = await Race.DistanceTakeInSec(race.Speed, (double)race.Distance); //How long will take to finish the race
             race.TimeElapsed = TimeSpan.FromSeconds((double)race.StartSpeed); //How long it took to finish
@@ -98,9 +90,7 @@ namespace CarRacingSimulator
                     && randomEvent == events.Find(e => e is BirdInWindshieldEvent)
                     )
                 {
-                    Console.ForegroundColor = ConsoleColor.DarkYellow;
                     await randomEvent.Apply(race);
-                    Console.ResetColor();
                     race.TimeElapsed += randomEvent.PenaltyTime;
                 }
 
@@ -111,9 +101,7 @@ namespace CarRacingSimulator
                 {
                     if (race.TimeRemaining >= timeToWait)
                     {
-                        Console.ForegroundColor = ConsoleColor.DarkYellow;
                         await randomEvent.Apply(race);
-                        Console.ResetColor();
                     }
                 }
 
@@ -127,10 +115,12 @@ namespace CarRacingSimulator
             };
 
             // Set the finish time for the car
+            Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"\n\t|> |> |> {car?.Name?.ToUpper()} finished the race and took {race.TimeElapsed.ToString("hh\\:mm\\:ss")} to complete it.");
+            Console.ResetColor();
         }
 
-        public static async Task RaceStatus(List<Race> races)
+        private static async Task RaceStatus(List<Race> races)
         {
             bool isRaceRunning = true;
 
@@ -208,7 +198,9 @@ namespace CarRacingSimulator
             // Print the winner message and delay for a configurable amount of time
             await Task.Delay(TimeSpan.FromSeconds(2));
             Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.WriteLine($"\n\t{winnerMessage}");
+            Console.WriteLine($"\n\t----------------------------------------------" +
+            $"\n\t{winnerMessage}" +
+            $"\n\t----------------------------------------------");
             Console.ResetColor();
         }
 
@@ -218,7 +210,7 @@ namespace CarRacingSimulator
             Console.WriteLine($"\n{car?.Name?.ToUpper()} took the turn smoothly without losing too much momentum.");
         }
 
-        private static void ASCIICarRacingMessage(string message)
+        private static async Task ASCIICarRacingMessage(string message)
         {
             Console.ForegroundColor = ConsoleColor.DarkCyan;
             Console.WriteLine($"" +
@@ -226,6 +218,22 @@ namespace CarRacingSimulator
                 $"\n.-'--`-._" +
                 $"\n'-O---O--'  {message}\n");
             Console.ResetColor();
+            await Task.Delay(TimeSpan.FromSeconds(2));
+        }
+
+        private static async Task BannerMessageScreen()
+        {
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine(@"         ____________________ ");
+            Console.WriteLine(@"        |                    |");
+            Console.WriteLine(@"        |     CAR RACING     |");
+            Console.WriteLine(@"        |  CONSOLE SIMULATOR |");
+            Console.WriteLine(@"        |        1.0         |");
+            Console.WriteLine(@"        |____________________|");
+            Console.ResetColor();
+            Console.WriteLine("\nPress any key to display the status of the race once it has started.");
+            //Console.WriteLine("\nNote: At the end of the race, in case the result does not display automatically, press any key to update the status and view the result.");
+            await Task.Delay(TimeSpan.FromSeconds(2));
         }
     }
 }
