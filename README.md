@@ -7,7 +7,7 @@ by <a href="https://github.com/Cecilia-Coutinho">Cecilia Coutinho</a>
 <h2>🌍 Overview</h2>
 
 <p align = center>
-The Car Racing Console Simulator is designed to run races with multiple cars over a set distance while tracking the time spent by each car to complete the distance. The system includes random events that may occur during the race to add excitement and unpredictability. Each car runs on its own thread to enable parallel processing and improve performance. The simulation is console-based only and does not include graphics.
+The Car Racing Console Simulator is designed to run a car racing game where multiple cars compete against each other in a console-based environment, with no graphics. The system includes random events that may occur during the race to add excitement and unpredictability. The program utilizes asynchronous programming using the async/await keywords and each car is assigned its own thread, allowing multiple cars to race simultaneously without interfering with each other. The use of async/await ensures that the program does not block the main thread while waiting for tasks to complete.
 </p>
 
 <h2>📋 MVP</h2>
