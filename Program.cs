@@ -53,7 +53,7 @@ namespace CarRacingSimulator
             var car = race.CarOnTheRace;
             bool isTimeRemaining = race.TimeRemaining.TotalSeconds > 0;
 
-            Console.WriteLine($"\n{car.Name.ToUpper()} started smoothly without losing to much momentum.");
+            Console.WriteLine($"\n{car.Name.ToUpper()} started smoothly without losing too much momentum.");
 
             // Loop until the race is finished
             while (isTimeRemaining)
