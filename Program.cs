@@ -31,18 +31,13 @@ namespace CarRacingSimulator
             // Print the start of the race
             await ASCIICarRacingMessage(startMessage);
 
-            // Launch the task to wait for a keypress
-            Task consoleKeyTask = Task.Run(() => { _ = RaceStatus(races); });
-
-            // ... Launch other async tasks ...
+            // ... Launch race tasks ...
             await Task.WhenAll(
                 StartRace(race1),
                 StartRace(race2),
-                StartRace(race3)
+                StartRace(race3),
+                RaceStatus(races)
             );
-
-            // Waits for the keypress to end it all
-            await consoleKeyTask;
 
             // Determine the winner and print the result
             await DefineWinner(races);
@@ -53,7 +48,7 @@ namespace CarRacingSimulator
 
         private static async Task StartRace(Race race)
         {
-            race.TimeRemaining = await Race.DistanceTakeInSec(race.Speed, (double)race.Distance); //How long will take to finish the race
+            race.TimeRemaining = await Race.DistanceTakeInSec(race.Speed, (double)race.DefaultDistance); //How long will take to finish the race
             race.TimeElapsed = TimeSpan.FromSeconds((double)race.StartSpeed); //How long it took to finish
             var car = race.CarOnTheRace;
             bool isTimeRemaining = race.TimeRemaining.TotalSeconds > 0;
@@ -71,7 +66,7 @@ namespace CarRacingSimulator
                 decimal outOfGasProbability = (30 / 50) * 100;
                 decimal flatTireProbability = (40 / 50) * 100;
                 decimal birdInWindshieldProbability = (50 / 50) * 100;
-                decimal engineProblemProbability = (50 / 50) * 100; ;
+                decimal engineProblemProbability = (49 / 50) * 100; ;
                 int rand = new Random().Next(0, 100);
 
                 //randon method to call event
@@ -147,17 +142,18 @@ namespace CarRacingSimulator
                         TimeSpan remainingTime = race.TimeRemaining;
                         int currentSpeed = race.Speed;
                         int distanceLeft = await Race.UpdateDistance(race);
+                        int distanceTraveled = race.DefaultDistance - distanceLeft;
 
-                        Console.WriteLine($"\n{carName} has an elapsed time of {elapsedTime} and has an average time to finish in {remainingTime}" +
-                            $"\nCurrent Speed: {currentSpeed} km/h. " +
-                            $"\nDistance left: {distanceLeft} km." +
+                        Console.WriteLine($"\n{carName.ToUpper()}:" +
+                            $"\n>>> Current Speed: {currentSpeed} km/h. " +
+                            $"\n>>> Distance Traveled: {distanceTraveled} km." +
                             $"\n----------------------------------");
                     });
                     gotKey = false;
                 }
 
                 // Wait for tasks to get done
-                await Task.Delay(10);
+                await Task.Delay(TimeSpan.FromSeconds(1));
 
                 // Finish simulation when time remaining of all race are equal 0.
                 var totalRemaining = races.Select(race => race.TimeRemaining.TotalSeconds).Sum();
@@ -166,7 +162,6 @@ namespace CarRacingSimulator
                 {
                     return;
                 }
-
             }
         }
 

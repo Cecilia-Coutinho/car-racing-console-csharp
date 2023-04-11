@@ -6,10 +6,12 @@ namespace CarRacingSimulator.Models
     {
         public class Race
         {
-            public int Distance { get; set; } = 10; //km
+            public int Distance { get; set; } //km
             public int Speed { get; set; } = 120; //km/h
 
             public static readonly int HourInSeconds = 3600; //1h
+
+            public readonly int DefaultDistance = 10; //km
 
             public readonly int StartSpeed = 0; //always starts with 0
             public TimeSpan TimeElapsed { get; set; }
