@@ -122,33 +122,51 @@ namespace CarRacingSimulator
 
         private static async Task RaceStatus(List<Race> races)
         {
-            bool isRaceRunning = true;
-
             // status of all cars
-            while (isRaceRunning)
+            while (true)
             {
-                Console.ReadKey(true);
-                await Task.Delay(TimeSpan.FromSeconds(1));
-                races.ForEach(async race =>
+                DateTime start = DateTime.Now;
+                bool gotKey = false;
+
+                while ((DateTime.Now - start).TotalSeconds < 2)
                 {
-                    string carName = race.CarOnTheRace.Name;
-                    TimeSpan elapsedTime = race.TimeElapsed;
-                    TimeSpan remainingTime = race.TimeRemaining;
-                    int currentSpeed = race.Speed;
-                    int distanceLeft = await Race.UpdateDistance(race);
+                    if (Console.KeyAvailable)
+                    {
+                        gotKey = true;
+                        break;
+                    }
+                }
 
-                    Console.WriteLine($"\n{carName} has an elapsed time of {elapsedTime} and has an average time to finish in {remainingTime}" +
-                        $"\nCurrent Speed: {currentSpeed} km/h. " +
-                        $"\nDistance left: {distanceLeft} km." +
-                        $"\n----------------------------------");
-                });
+                if (gotKey)
+                {
+                    Console.ReadKey();
+                    races.ForEach(async race =>
+                    {
+                        string carName = race.CarOnTheRace.Name;
+                        TimeSpan elapsedTime = race.TimeElapsed;
+                        TimeSpan remainingTime = race.TimeRemaining;
+                        int currentSpeed = race.Speed;
+                        int distanceLeft = await Race.UpdateDistance(race);
 
+                        Console.WriteLine($"\n{carName} has an elapsed time of {elapsedTime} and has an average time to finish in {remainingTime}" +
+                            $"\nCurrent Speed: {currentSpeed} km/h. " +
+                            $"\nDistance left: {distanceLeft} km." +
+                            $"\n----------------------------------");
+                    });
+                    gotKey = false;
+                }
+
+                // Wait for tasks to get done
+                await Task.Delay(10);
+
+                // Finish simulation when time remaining of all race are equal 0.
                 var totalRemaining = races.Select(race => race.TimeRemaining.TotalSeconds).Sum();
 
                 if (totalRemaining == 0)
                 {
-                    isRaceRunning = false;
+                    return;
                 }
+
             }
         }
 
