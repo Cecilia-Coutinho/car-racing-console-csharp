@@ -53,6 +53,8 @@ namespace CarRacingSimulator
             var car = race.CarOnTheRace;
             bool isTimeRemaining = race.TimeRemaining.TotalSeconds > 0;
 
+            Console.WriteLine($"\n{car.Name.ToUpper()} started smoothly without losing to much momentum.");
+
             // Loop until the race is finished
             while (isTimeRemaining)
             {
@@ -63,10 +65,10 @@ namespace CarRacingSimulator
                 race.TimeElapsed += timeToWait;
 
                 // Determine the probability of each event occurring
-                decimal outOfGasProbability = (30 / 50) * 100;
-                decimal flatTireProbability = (40 / 50) * 100;
+                decimal outOfGasProbability = (40 / 50) * 100;
+                decimal flatTireProbability = (50 / 50) * 100;
                 decimal birdInWindshieldProbability = (50 / 50) * 100;
-                decimal engineProblemProbability = (49 / 50) * 100; ;
+                decimal engineProblemProbability = (50 / 50) * 100; ;
                 int rand = new Random().Next(0, 100);
 
                 //randon method to call event
@@ -220,7 +222,7 @@ namespace CarRacingSimulator
         private static async Task WaitForEvent(TimeSpan timeToWait, Car car)
         {
             await Task.Delay(timeToWait);
-            Console.WriteLine($"\n{car?.Name?.ToUpper()} took the turn smoothly without losing too much momentum.");
+            //Console.WriteLine($"\n{car?.Name?.ToUpper()} took the turn smoothly without losing too much momentum.");
         }
 
         private static async Task ASCIICarRacingMessage(string message)
