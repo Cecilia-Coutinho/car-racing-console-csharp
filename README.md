@@ -41,6 +41,7 @@ The Minimum Viable Product(MVP) of the Car Racing Console Simulator includes the
 >📝 Kanban
 
 <h3>💭Reflections or Aditional Info</h3>
+
 <p>
 The code simulates a simple race between multiple cars and demonstrates the use of asynchronous programming, as well as using C# interfaces to produce events' behaviour. It's a functional console-based car racing simulation system with no graphics. 
 </p>
